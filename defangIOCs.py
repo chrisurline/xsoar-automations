@@ -1,3 +1,5 @@
+# intended to be used as a transformer but is currently untested 
+
 from typing import Dict, Any
 import traceback
 import re

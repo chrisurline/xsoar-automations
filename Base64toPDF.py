@@ -1,4 +1,6 @@
-# made for PAN WildFire Reports integration
+# thrown together for PAN WildFire Reports integration
+# config args input + output_filename - both required, add default value for filename
+# when running the '!internal-wildfire-get-report', it doesn't output to context by default so use 'extend-context'
 
 from typing import Dict, Any
 import traceback
