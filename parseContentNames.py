@@ -2,6 +2,7 @@
 # e.g. you use demisto-sdk to create a custom content pack and you just want to dump the names for documentation or whatever ;)
 # how I use it: navigate to your content pack (Packs/Content-Pack), run the script `python3 \home\chris\parseContentNames.py`
 # out spits a file with the names (content-names.txt). I also added that filename name to .gitignore. 
+# this will wipe the contents of content-names.txt on each run
 
 import os
 import json
