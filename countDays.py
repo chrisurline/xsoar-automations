@@ -29,19 +29,11 @@ def main():
         delta = input_time - now
         days_difference = delta.days
 
-        # construct the output message
-        if days_difference > 0:
-            message = f"{days_difference} day(s) until"
-        elif days_difference < 0:
-            message = f"{abs(days_difference)} day(s) ago"
-        else:
-            message = "today"
-
         # return the result
         demisto.results({
             'Type': 1,
             'ContentsFormat': 'text',
-            'Contents': message
+            'Contents': days_difference
         })
 
     except Exception as e:
