@@ -13,12 +13,14 @@ def main():
         if not timestamp_str:
             return_error('No timestamp provided. Please provide a valid timestamp.')
 
-        # parse timestamp and handle timezone-aware datetime 
-        input_time = dateparser.parse(
-            timestamp_str, settings={'RETURN_AS_TIMEZONE_AWARE': True}
-        )
+        # parse timestamp
+        input_time = dateparser.parse(timestamp_str)
         if not input_time:
             return_error('Failed to parse the provided timestamp.')
+
+        # remove timestamp
+        if input_time.tzinfo is not None:
+            input_time = input_time.replace(tzinfo=None)
 
         # get current datetime
         now = datetime.now()
