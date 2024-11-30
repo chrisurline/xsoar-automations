@@ -39,7 +39,7 @@ def main():
 
         # return the result
         demisto.results({
-            'Type': 4,
+            'Type': 1,
             'ContentsFormat': 'text',
             'Contents': message
         })
