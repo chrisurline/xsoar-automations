@@ -9,7 +9,7 @@ def main():
     try:
         # retrieve the 'timestamp' argument
         args = demisto.args()
-        timestamp_str = args.get('timestamp')
+        timestamp_str = args.get('value')
         if not timestamp_str:
             return_error('No timestamp provided. Please provide a valid timestamp.')
 
