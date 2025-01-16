@@ -76,15 +76,21 @@ def main():
   xsoar_id = demisto.incident().get('id')
 
   try:
-    # Only execute if the incident status is 'Closed'
-    if demisto.incident().get('status') == 2: # 2 represents 'Closed' in XSOAR incident status
-      incident_id, detection_id = get_crowdstrike_ids()
+    if demisto.incident().get('status') == 2: # 2 represents 'Closed' in xsoar incident status
+      resolve_alert = demisto.incident().get('CustomFields', {}).get('crowdstrikeresolvealert')
+      
+      if resolve_alert == "Yes":
+          incident_id, detection_id = get_crowdstrike_ids()
+          
+          if incident_id:
+            close_crowdstrike_incident(incident_id)
 
-      if incident_id:
-        close_crowdstrike_incident(incident_id, xsoar_id)
-
-      if detection_id:
-        close_crowdstrike_detection(detection_id, xsoar_id)
+          if detection_id:
+            close_crowdstrike_detection(detection_id)
+      elif resolve_alert == "No":
+          demisto.info("CrowdStrike Resolve Alert is set to No. Skipping CrowdStrike post processing.")
+      else:
+          demisto.info("CrowdStrike Resolve Alert field is not set or does not have a valid value. Skipping CrowdStrike post processing.")
     else:
         demisto.info(f"Incident status is not Closed. Current status: {demisto.incident().get('status')}. Skipping CrowdStrike post processing.")
 
