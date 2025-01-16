@@ -1,5 +1,5 @@
 # input a timestamp and get back a string loosely representing how long ago or how far in the future 
-# ex. "3 days ago", "19 years ago", "9 days from now"
+# ex. "3 days ago", "19 years ago", "9 days from now" 
 
 from typing import Dict, Any
 import traceback
