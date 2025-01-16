@@ -103,10 +103,10 @@ def main():
     close_code_map = {
         "False Positive": "false_positive",
         "True Positive": "true_positive",
-        "Duplicate": "closed"
+        "Duplicate": ""
     }
 
-    close_code = close_code_map.get(close_reason, "closed")
+    close_code = close_code_map.get(close_reason, "")
 
     try:
         if resolve_alert == "Yes":
