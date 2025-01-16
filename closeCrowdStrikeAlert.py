@@ -14,7 +14,7 @@ notes:
 - this script will attempt to close both incidents and detections
 """
 
-import demistomark as dm
+from typing import Dict, Any
 import traceback
 
 def is_error(result):
@@ -83,10 +83,10 @@ def main():
           incident_id, detection_id = get_crowdstrike_ids()
           
           if incident_id:
-            close_crowdstrike_incident(incident_id)
+            close_crowdstrike_incident(incident_id, xsoar_id)
 
           if detection_id:
-            close_crowdstrike_detection(detection_id)
+            close_crowdstrike_detection(detection_id, xsoar_id)
       elif resolve_alert == "No":
           demisto.info("CrowdStrike Resolve Alert is set to No. Skipping CrowdStrike post processing.")
       else:
