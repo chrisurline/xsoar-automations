@@ -24,64 +24,97 @@ note: there are security considerations that need to be evaluated for each scena
 
 """
 
-import demistomock as demisto
-from CommonServerPython import *
-from CommonServerUserPython import *
+import requests
+from bs4 import BeautifulSoup
 
-def login_to_service(base_url, username, password):
 
-    # establish session
+def submit_form(base_url, username, password, inc_id, workflow_id):
+    """
+    Authenticates to a site and submits a form with default values.
+    Modify this function as needed to match the actual login and form submission flow.
+    """
 
-    client = Client(
-        base_url=base_url,
-        verify=False,  # verify cert? 
-        proxy=False  
-    )
+    # create a session
+    session = requests.Session()
+    session.verify = False  # not recommended for production, but can be used if needed
 
-    login_data = {
-        'username': username,
-        'password': password
+    # authentication step
+    login_endpoint = f"{base_url}/login"
+    login_payload = {
+        "username": username,
+        "password": password
     }
+    # perform the POST to log in
+    response = session.post(login_endpoint, data=login_payload)
 
-    login_response = client.post(
-        url='/login',
-        json=login_data
-    )
+    # check if login was successful
+    if response.status_code != 200:
+        raise ValueError(f"Login failed with status code {response.status_code}.")
 
-    login_response.raise_for_status()  # raise an error if the login failed
+    # retrieve the form page
+    form_page_url = f"{base_url}/forms/myForm"
+    form_page = session.get(form_page_url)
+    if form_page.status_code != 200:
+        raise ValueError(f"Form page retrieval failed with status code {form_page.status_code}.")
 
-    return client
+    # parse the form to retrieve default form fields (if you need hidden values, tokens, etc.)
+    soup = BeautifulSoup(form_page.text, "html.parser")
+    form = soup.find("form", {"name": "new_custom_workflow_execution"})
+    if not form:
+        raise ValueError("Could not find form 'new_custom_workflow_execution' on the page.")
 
-def submit_form(client, trap_inc_id):
-    # submits the form
+    # collect default form inputs (including hidden fields)
+    form_data = {}
+    for input_tag in form.find_all("input"):
+        name = input_tag.get("name")
+        value = input_tag.get("value", "")
+        # populate the dictionary
+        if name:
+            form_data[name] = value
 
-    form_response = client.post(
-        url=f'/incidents/{trap_inc_id}/custom_workflow_executions'
-    )
+    # form_data['inc_id'] = inc_id
+    # form_data['workflow_id'] = workflow_id
 
-    form_response.raise_for_status()
+    # submit the form
+    action = form.get("action")
+    if not action.startswith("http"):
+        # build the absolute URL if it's a relative action
+        # (this might just be `f"{base_url}/{action}"` depending on how your site is structured)
+        action = requests.compat.urljoin(form_page_url, action)
 
-    return form_response
+    # now POST the form data
+    submit_response = session.post(action, data=form_data)
+    if submit_response.status_code not in [200, 302]:
+        raise ValueError(
+            f"Form submission failed with status code {submit_response.status_code}."
+        )
+
+    return "Form submitted successfully."
+
 
 def main():
+
+    # get conn/auth parameters
+    base_url = demisto.args().get('base_url')
+    username = demisto.args().get('username')
+    password = demisto.args().get('password')
+
+    # get incident arguments
+    inc_id = demisto.args().get('inc_id')
+    workflow_id = demisto.args().get('workflow_id')
+
     try:
-        base_url = demisto.args().get('base_url')
-        username = demisto.args().get('username')
-        password = demisto.args().get('password')
-        workflow_id = demist.args().get('workflow_id')
-        trap_inc_id = demisto.args().get('trap_inc_id')
+        result_message = submit_form(
+            base_url=base_url,
+            username=username,
+            password=password,
+            inc_id=inc_id,
+            workflow_id=workflow_id
+        )
 
-        # step 1 - establish session
-        client = login_to_service(base_url, username, password, workflow_id)
-
-        # step 3 - submit the form
-        form_response = submit_form(client, trap_inc_id)
-
-        demisto.results(form_response.json())
-
+        return_results(result_message)
     except Exception as e:
-        demisto.error(traceback.format_exc())  # print the full traceback
-        return_error(f"Error: {str(e)}")
+        return_error(f"Error submitting form: {str(e)}")
 
-if __name__ in ('__main__', '__builtin__', 'builtins'):
+if __name__ in ("__builtin__", "builtins", "__main__"):
     main()
