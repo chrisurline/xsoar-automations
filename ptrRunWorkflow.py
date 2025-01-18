@@ -29,10 +29,6 @@ from bs4 import BeautifulSoup
 
 
 def submit_form(base_url, username, password, inc_id, workflow_id):
-    """
-    Authenticates to a site and submits a form with default values.
-    Modify this function as needed to match the actual login and form submission flow.
-    """
 
     # create a session
     session = requests.Session()
